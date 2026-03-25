@@ -1,5 +1,4 @@
-# MapScanner 2026
-
+<p align="center"><img src="MapScanner_logo (2).png" width="400"></p>
 MapScanner 2026 is a desktop file scanner built with Python and PySide6.
 
 It helps you browse folders, scan files, filter through results visually, copy paths or filenames, and export selections to text. The app includes multilingual UI support, custom branding, sortable result columns, and an About dialog with bundled assets.
