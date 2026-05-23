@@ -1,3 +1,7 @@
+# MapScanner_2026_v1.py
+# Run 1-liner: & C:\Users\ansem\Documents\GitHub\_venvs\venv_cuda_py311_np2\Scripts\Activate.ps1; python .\MapScanner_2026_v1.py
+# pip install PySide6
+# Advies venv: venv_cuda_py311_np2
 from __future__ import annotations
 import sys
 import os
@@ -5,7 +9,7 @@ import os
 # ---------------------
 
 # MapScanner 2026 | Zoek. Vind. Klaar.
-# Release v1
+# v1.0.0
 
 import shutil
 import subprocess
@@ -19,20 +23,21 @@ from PySide6 import QtCore, QtGui, QtWidgets
 # ---------------- Config ----------------
 APP_NAME = "MapScanner 2026"
 TAGLINE = "Zoek. Vind. Klaar."
-VERSION = "Release v1"
+VERSION = "v1.0.0"
 APP_ID = "MapScanner2026"
 SETTINGS_ORG = "MapScanner"
 REPO_URL = "https://github.com/Rymnda"
 APP_ICON_FILE = "MapScanner_icon.ico"
 ABOUT_IMAGE_FILE = "MapScanner_logo (2).png"
 HEADER_FONT_FILE = "Ethnocentric Rg.otf"
+ADVISED_VENV = "venv_cuda_py311_np2"
 
 VIDEO_EXTS = {".mp4", ".mkv", ".mov", ".avi", ".webm", ".m4v", ".ts", ".flv"}
 
 # ---------------- i18n ----------------
 STRINGS: Dict[str, Dict[str, str]] = {
     "en": {
-        "file": "File", "settings": "Settings", "help": "Help", "exit": "Exit",
+        "file": "File", "settings": "Settings", "info_menu": "Info", "help": "Help", "exit": "Exit",
         "language": "Language", "include_sub": "Include subfolders",
         "tagline": "Search. Find. Done.",
         "scan": "Scan files", "copy_sel": "Copy paths", "copy_names": "Copy filenames", "copy_ps": "Copy (PS Format)",
@@ -47,6 +52,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "select_all": "Check all", "deselect_all": "Uncheck all",
         "fit_cols": "Auto-fit columns", "checked_stat": "Checked: {n} / Total: {t}",
         "export_txt": "Export to TXT",
+        "selected_folders": "{n} folders selected",
         # Context menu
         "ctx_open_file": "▶ Open file", "ctx_open_folder": "📂 Open containing folder",
         "ctx_copy_path": "📋 Copy full path", "ctx_check": "✓ Check selected", "ctx_uncheck": "✗ Uncheck selected",
@@ -62,7 +68,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "default_cleared": "Default folder cleared."
     },
     "nl": {
-        "file": "Bestand", "settings": "Instellingen", "help": "Help", "exit": "Afsluiten",
+        "file": "Bestand", "settings": "Instellingen", "info_menu": "Info", "help": "Help", "exit": "Afsluiten",
         "language": "Taal", "include_sub": "Submappen meenemen",
         "tagline": "Zoek. Vind. Klaar.",
         "scan": "Bestanden scannen", "copy_sel": "Kopieer paden", "copy_names": "Kopieer bestandsnamen", "copy_ps": "Kopieer (PS Formaat)",
@@ -77,6 +83,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "select_all": "Alles aanvinken", "deselect_all": "Alles uitvinken",
         "fit_cols": "Kolommen passend maken", "checked_stat": "Aangevinkt: {n} / Totaal: {t}",
         "export_txt": "Exporteer naar TXT",
+        "selected_folders": "{n} mappen geselecteerd",
         # Context menu
         "ctx_open_file": "▶ Bestand openen", "ctx_open_folder": "📂 Map openen",
         "ctx_copy_path": "📋 Pad kopiëren", "ctx_check": "✓ Selectie aanvinken", "ctx_uncheck": "✗ Selectie uitvinken",
@@ -92,7 +99,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "default_cleared": "Standaard map gewist. Laatst gebruikte map wordt nu gebruikt."
     },
     "de": {
-        "file": "Datei", "settings": "Einstellungen", "help": "Hilfe", "exit": "Beenden",
+        "file": "Datei", "settings": "Einstellungen", "info_menu": "Info", "help": "Hilfe", "exit": "Beenden",
         "language": "Sprache", "include_sub": "Unterordner einbeziehen",
         "tagline": "Suchen. Finden. Fertig.",
         "scan": "Dateien scannen", "copy_sel": "Pfade kopieren", "copy_names": "Dateinamen kopieren", "copy_ps": "Kopieren (PS-Format)",
@@ -107,6 +114,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "select_all": "Alles auswählen", "deselect_all": "Alles abwählen",
         "fit_cols": "Spalten anpassen", "checked_stat": "Ausgewählt: {n} / Gesamt: {t}",
         "export_txt": "Nach TXT exportieren",
+        "selected_folders": "{n} Ordner ausgewählt",
         "ctx_open_file": "▶ Datei öffnen", "ctx_open_folder": "📂 Ordner öffnen",
         "ctx_copy_path": "📋 Vollständigen Pfad kopieren", "ctx_check": "✓ Auswahl markieren", "ctx_uncheck": "✗ Auswahl aufheben",
         "set_media_info": "Mediendauer scannen (langsamer)",
@@ -120,7 +128,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "default_cleared": "Standardordner gelöscht."
     },
     "es": {
-        "file": "Archivo", "settings": "Configuración", "help": "Ayuda", "exit": "Salir",
+        "file": "Archivo", "settings": "Configuración", "info_menu": "Info", "help": "Ayuda", "exit": "Salir",
         "language": "Idioma", "include_sub": "Incluir subcarpetas",
         "tagline": "Busca. Encuentra. Listo.",
         "scan": "Escanear archivos", "copy_sel": "Copiar rutas", "copy_names": "Copiar nombres", "copy_ps": "Copiar (Formato PS)",
@@ -135,6 +143,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "select_all": "Marcar todo", "deselect_all": "Desmarcar todo",
         "fit_cols": "Ajustar columnas", "checked_stat": "Marcados: {n} / Total: {t}",
         "export_txt": "Exportar a TXT",
+        "selected_folders": "{n} carpetas seleccionadas",
         "ctx_open_file": "▶ Abrir archivo", "ctx_open_folder": "📂 Abrir carpeta",
         "ctx_copy_path": "📋 Copiar ruta completa", "ctx_check": "✓ Marcar selección", "ctx_uncheck": "✗ Desmarcar selección",
         "set_media_info": "Escanear duración multimedia (más lento)",
@@ -170,8 +179,28 @@ def app_base_dir() -> str:
     return os.path.dirname(os.path.abspath(__file__))
 
 
+def detect_active_venv_name() -> str:
+    exe_dir = os.path.dirname(sys.executable)
+    if os.path.basename(exe_dir).lower() == "scripts":
+        venv_name = os.path.basename(os.path.dirname(exe_dir))
+        if venv_name:
+            return venv_name
+    return ADVISED_VENV
+
+
+def build_window_title() -> str:
+    return f"{APP_NAME} - {VERSION} - {detect_active_venv_name()}"
+
+
 def resource_path(filename: str) -> str:
-    return os.path.join(app_base_dir(), filename)
+    candidates = [
+        os.path.join(app_base_dir(), filename),
+        os.path.join(app_base_dir(), "Assets", filename),
+    ]
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return candidate
+    return candidates[0]
 
 
 def load_app_icon() -> QtGui.QIcon:
@@ -196,13 +225,13 @@ def load_header_font_family() -> str:
 
 def section_title_style() -> str:
     return (
-        "color: #c9f1ff; "
-        "font-weight: 700; "
+        "color: #ffffff; "
+        "font-weight: 900; "
         "font-size: 11pt; "
-        "letter-spacing: 0.4px; "
+        "letter-spacing: 0.2px; "
         "padding: 6px 10px; "
-        "background-color: #070c19; "
-        "border: 1px solid #1a3154; "
+        "background-color: #0c1627; "
+        "border: 1px solid #263d58; "
         "border-radius: 10px;"
     )
 
@@ -224,6 +253,50 @@ def dur_to_str(s: float) -> str:
     m, sec = divmod(int(s + 0.5), 60)
     h, m = divmod(m, 60)
     return f"{h:02d}:{m:02d}:{sec:02d}" if h else f"{m:02d}:{sec:02d}"
+
+
+def unique_existing_dirs(paths: Iterable[str]) -> List[str]:
+    unique: List[str] = []
+    seen = set()
+    for raw_path in paths:
+        cleaned = os.path.normpath(str(raw_path).strip().strip('"'))
+        if not cleaned or not os.path.isdir(cleaned):
+            continue
+        key = os.path.normcase(cleaned)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(cleaned)
+    return unique
+
+
+def compact_scan_roots(paths: Iterable[str], recurse: bool) -> List[str]:
+    roots = unique_existing_dirs(paths)
+    if not recurse:
+        return roots
+
+    compacted: List[str] = []
+    compacted_keys: List[str] = []
+    for root in sorted(roots, key=lambda item: (len(item), item.lower())):
+        root_key = os.path.normcase(root)
+        is_nested = False
+        for key in compacted_keys:
+            try:
+                if os.path.commonpath([root_key, key]) == key:
+                    is_nested = True
+                    break
+            except ValueError:
+                continue
+        if is_nested:
+            continue
+        compacted.append(root)
+        compacted_keys.append(root_key)
+    return compacted
+
+
+def parse_scan_roots_text(text: str) -> List[str]:
+    chunks = text.replace("\r", "\n").replace(";", "\n").split("\n")
+    return unique_existing_dirs(chunks)
 
 
 FFPROBE = shutil.which("ffprobe")
@@ -279,6 +352,8 @@ class FileInfo:
     size: int
     mtime: float
     ext: str
+    root_path: str
+    depth: int
     duration: float = 0.0
     checked: bool = False
 
@@ -299,7 +374,7 @@ class FileInfo:
 
 
 class FileTableModel(QtCore.QAbstractTableModel):
-    COLS = ["✓", "Name", "Map", "Type", "Full Path", "Size", "Duration", "Modified"]
+    COLS = ["✓", "Name", "Depth", "Map", "Type", "Full Path", "Size", "Duration", "Modified"]
 
     def __init__(self, items: Optional[List[FileInfo]] = None):
         super().__init__()
@@ -339,16 +414,17 @@ class FileTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole:
             if c == 0: return ""
             if c == 1: return fi.name
-            if c == 2: return os.path.basename(os.path.dirname(fi.full_path))
-            if c == 3: return fi.type_str
-            if c == 4: return fi.full_path
-            if c == 5: return human_size(fi.size)
-            if c == 6: return fi.duration_str
-            if c == 7: return fi.last_modified_str
+            if c == 2: return fi.depth
+            if c == 3: return os.path.basename(os.path.dirname(fi.full_path))
+            if c == 4: return fi.type_str
+            if c == 5: return fi.full_path
+            if c == 6: return human_size(fi.size)
+            if c == 7: return fi.duration_str
+            if c == 8: return fi.last_modified_str
 
-        if role == QtCore.Qt.TextAlignmentRole and c in (5, 6):
+        if role == QtCore.Qt.TextAlignmentRole and c in (2, 6, 7):
             return QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
-        if role == QtCore.Qt.ToolTipRole and c == 4:
+        if role == QtCore.Qt.ToolTipRole and c == 5:
             return fi.full_path
         return None
 
@@ -398,18 +474,20 @@ class SortProxy(QtCore.QSortFilterProxyModel):
         if column == 1:
             return left_item.name.lower() < right_item.name.lower()
         if column == 2:
+            return left_item.depth < right_item.depth
+        if column == 3:
             left_folder = os.path.basename(os.path.dirname(left_item.full_path)).lower()
             right_folder = os.path.basename(os.path.dirname(right_item.full_path)).lower()
             return left_folder < right_folder
-        if column == 3:
-            return left_item.type_str.lower() < right_item.type_str.lower()
         if column == 4:
-            return left_item.full_path.lower() < right_item.full_path.lower()
+            return left_item.type_str.lower() < right_item.type_str.lower()
         if column == 5:
-            return left_item.size < right_item.size
+            return left_item.full_path.lower() < right_item.full_path.lower()
         if column == 6:
-            return left_item.duration < right_item.duration
+            return left_item.size < right_item.size
         if column == 7:
+            return left_item.duration < right_item.duration
+        if column == 8:
             return left_item.mtime < right_item.mtime
 
         return super().lessThan(left, right)
@@ -422,9 +500,9 @@ class ScannerWorker(QtCore.QObject):
     finished = QtCore.Signal(list)
     progress = QtCore.Signal(str)
 
-    def __init__(self, root: str, recurse: bool, max_depth: int, want_duration: bool, show_hidden: bool):
+    def __init__(self, roots: List[str], recurse: bool, max_depth: int, want_duration: bool, show_hidden: bool):
         super().__init__()
-        self.root = root
+        self.roots = roots
         self.recurse = recurse
         self.want_duration = want_duration
         self.show_hidden = show_hidden
@@ -435,14 +513,22 @@ class ScannerWorker(QtCore.QObject):
     def run(self) -> None:
         try:
             items: List[FileInfo] = []
-            self.progress.emit(T("scanning").format(p=self.root))
             vid_exts = VIDEO_EXTS
-            for fi in self._iter_files(self.root, self.recurse, self.max_depth):
+            seen_paths = set()
+            for root in self.roots:
+                self.progress.emit(T("scanning").format(p=root))
+                for fi in self._iter_files(root, self.recurse, self.max_depth):
+                    if self._abort:
+                        break
+                    path_key = os.path.normcase(fi.full_path)
+                    if path_key in seen_paths:
+                        continue
+                    seen_paths.add(path_key)
+                    if self.want_duration and fi.ext in vid_exts:
+                        fi.duration = probe_duration(fi.full_path)
+                    items.append(fi)
                 if self._abort:
                     break
-                if self.want_duration and fi.ext in vid_exts:
-                    fi.duration = probe_duration(fi.full_path)
-                items.append(fi)
             items.sort(key=lambda x: x.mtime, reverse=True)
             self.finished.emit(items)
         except Exception as e:
@@ -475,6 +561,8 @@ class ScannerWorker(QtCore.QObject):
                                     size=0,
                                     mtime=stat.st_mtime,
                                     ext=".MAP",
+                                    root_path=root,
+                                    depth=depth + 1,
                                     checked=False,
                                 )
                             except OSError:
@@ -498,6 +586,8 @@ class ScannerWorker(QtCore.QObject):
                                     stat.st_size,
                                     stat.st_mtime,
                                     ext,
+                                    root,
+                                    depth + 1,
                                     checked=is_checked,
                                 )
                             except OSError:
@@ -527,35 +617,61 @@ class DarkPalette:
         check_svg_url = check_svg_path.replace("\\", "/")
 
         return f"""
-        QWidget {{
-            background-color: #050814;
-            color: #E6EEF8;
-            font-family: 'Segoe UI', 'Inter', sans-serif;
+        QMainWindow, QWidget {{
+            background-color: #050812;
+            color: #eef5ff;
+            font-family: 'Segoe UI', Arial, sans-serif;
             font-size: 10pt;
         }}
-        QMenuBar {{ background: #050814; border-bottom: 1px solid #151b2c; }}
-        QMenuBar::item:selected {{ background: #1e2b40; }}
-        QMenu {{ background: #050b16; border: 1px solid #1b2233; }}
-        QMenu::item:selected {{ background: #2b3a55; }}
+        QMenuBar {{
+            background: #070d18;
+            color: #d8e8fb;
+            border-bottom: 1px solid #1d3552;
+            padding: 4px 8px;
+            font-weight: 700;
+        }}
+        QMenuBar::item {{
+            padding: 7px 12px;
+            border-radius: 8px;
+            background: transparent;
+        }}
+        QMenuBar::item:selected {{ background: #13243a; color: #ffffff; }}
+        QMenu {{
+            background: #0a1220;
+            color: #edf6ff;
+            border: 1px solid #284765;
+            padding: 8px;
+        }}
+        QMenu::item {{
+            padding: 8px 28px;
+            border-radius: 7px;
+        }}
+        QMenu::item:selected {{ background: #1f6feb; color: #ffffff; }}
 
         QLineEdit {{
-            background: #0f1620;
-            border: 2px solid #2b3b5c;
-            padding: 8px;
-            border-radius: 6px;
+            background: #060d18;
+            border: 1px solid #263d58;
+            padding: 10px 12px;
+            border-radius: 12px;
+            color: #edf6ff;
+            font-weight: 700;
         }}
-        QLineEdit:focus {{ border: 2px solid #2d7bff; }}
+        QLineEdit:focus {{ border: 1px solid #4aa7e8; }}
 
         QPushButton {{
-            background: #172237;
-            border: 1px solid #2b3b5c;
-            padding: 8px 16px;
-            border-radius: 8px;
-            color: #E6EEF8;
+            background: qlineargradient(x1:0,y1:0,x2:0,y2:1, stop:0 #19304d, stop:1 #0f2035);
+            border: 1px solid #376797;
+            padding: 11px 14px;
+            border-radius: 10px;
+            color: #f8fbff;
+            font-weight: 800;
         }}
-        QPushButton:hover {{ background: #1f2d46; border-color: #4a6fa5; }}
-        QPushButton:checked {{ background: #2d7bff; border-color: #2d7bff; }}
-        QPushButton:pressed {{ background: #142036; }}
+        QPushButton:hover {{ background: #1c426c; border-color: #67d4ff; }}
+        QPushButton:checked {{ background: #16395e; border-color: #4aa7e8; }}
+        QPushButton:pressed {{ background: #0c1a2c; }}
+        QPushButton:disabled {{ color: #60758c; background: #0b1523; border-color: #1d3148; }}
+        QPushButton#PrimaryButton {{ background: #36bffa; border-color: #8ee4ff; color: #03111f; }}
+        QPushButton#PrimaryButton:hover {{ background: #67d4ff; border-color: #8ee4ff; }}
 
         QCheckBox {{ spacing: 8px; }}
         
@@ -563,45 +679,56 @@ class DarkPalette:
         QCheckBox::indicator, QTableView::indicator {{
             width: 20px; height: 20px;
             border-radius: 6px;
-            border: 2px solid #2d7bff;
-            background: #0f1620;
+            border: 2px solid #4aa7e8;
+            background: #060d18;
         }}
         QCheckBox::indicator:hover, QTableView::indicator:hover {{
-            border-color: #4a6fa5;
+            border-color: #67d4ff;
         }}
         QCheckBox::indicator:checked, QTableView::indicator:checked {{
             background-color: transparent;
-            border-color: #2d7bff;
+            border-color: #4aa7e8;
             image: url("{check_svg_url}");
         }}
 
         QHeaderView::section {{
-            background: #151F2E; color: #E6EEF8; padding: 8px; border: 0;
-            border-right: 1px solid #24344d; border-bottom: 1px solid #24344d;
+            background: #13233a;
+            color: #dcecff;
+            padding: 10px;
+            border: none;
+            border-right: 1px solid #203752;
+            font-weight: 900;
         }}
-        QTableView {{
-            gridline-color: #24344d;
-            background: #121A27;
-            selection-background-color: #1e2b40;
+        QTableView, QPlainTextEdit {{
+            background: #060d18;
+            alternate-background-color: #091321;
+            border: 1px solid #263d58;
+            border-radius: 12px;
+            color: #edf6ff;
+            gridline-color: transparent;
+            selection-background-color: #1769aa;
             selection-color: #ffffff;
-            alternate-background-color: #0d121c;
         }}
         QTreeView, QListView {{
-            background: #111827;
-            border: 1px solid #1d2a3e;
-            border-radius: 8px;
+            background: #060d18;
+            border: 1px solid #263d58;
+            border-radius: 12px;
+            color: #edf6ff;
             outline: 0;
         }}
-        QTreeView::item:hover, QListView::item:hover {{ background: #1e2b40; }}
-        QTreeView::item:selected, QListView::item:selected {{ background: #2d7bff; color: white; }}
+        QTreeView::item:hover, QListView::item:hover {{ background: #13243a; }}
+        QTreeView::item:selected, QListView::item:selected {{ background: #1769aa; color: white; }}
         QFrame.card {{
-            background: #111827;
-            border-radius: 12px;
-            border: 1px solid #1d2a3e;
+            background: qlineargradient(x1:0,y1:0,x2:1,y2:1, stop:0 #0b1220, stop:0.52 #101d30, stop:1 #07111f);
+            border-radius: 18px;
+            border: 1px solid #263d58;
         }}
+        QFrame.card:hover {{ border-color: #4aa7e8; }}
         QSplitter::handle {{ background: #1d2a3e; }}
-        QScrollBar:vertical {{ background: #050814; width: 10px; margin: 0; }}
-        QScrollBar::handle:vertical {{ background: #2b3b5c; min-height: 20px; border-radius: 5px; }}
+        QScrollBar:vertical {{ background: #07101d; width: 13px; margin: 0; }}
+        QScrollBar::handle:vertical {{ background: #294866; min-height: 32px; border-radius: 6px; }}
+        QScrollBar::handle:vertical:hover {{ background: #3b6a93; }}
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
         """
 
 
@@ -634,9 +761,9 @@ class PSResultDialog(QtWidgets.QDialog):
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, startup_dir: str = ""):
         super().__init__()
-        self.setWindowTitle(T("header_title"))
+        self.setWindowTitle(build_window_title())
         self.resize(1500, 950)
         
         # Load Settings
@@ -656,6 +783,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setStyleSheet(DarkPalette.stylesheet())
         self._thread, self._worker = None, None
+        self._selected_scan_paths: List[str] = []
 
         self._build_menubar()
 
@@ -666,6 +794,7 @@ class MainWindow(QtWidgets.QMainWindow):
         main_layout.setSpacing(16)
 
         header = QtWidgets.QFrame()
+        header.setObjectName("HeroCard")
         header.setFixedHeight(60)
         self.header_frame = header
         self._set_header_bg()
@@ -694,6 +823,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         left_card = QtWidgets.QFrame()
         left_card.setProperty("class", "card")
+        left_card.setObjectName("Card")
         left_layout = QtWidgets.QVBoxLayout(left_card)
         left_layout.setContentsMargins(12, 12, 12, 12)
 
@@ -731,10 +861,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.user_list.setRootIndex(
             self.lib_model.index(QtCore.QDir.homePath())
         )
+        self.user_list.setSelectionMode(
+            QtWidgets.QAbstractItemView.ExtendedSelection
+        )
         self.user_list.setSpacing(4)
         self.user_list.selectionModel().selectionChanged.connect(
             self._on_tree_selection_changed
         )
+        self.user_list.activated.connect(self._on_tree_double_clicked)
         self.user_list.doubleClicked.connect(self._on_tree_double_clicked)
         left_layout.addWidget(self.user_list, 1)
 
@@ -746,18 +880,31 @@ class MainWindow(QtWidgets.QMainWindow):
         self.folder_tree.setModel(self.fs_model)
         self.folder_tree.setHeaderHidden(True)
         self.folder_tree.setRootIndex(self.fs_model.index(""))
+        self.folder_tree.setSelectionMode(
+            QtWidgets.QAbstractItemView.ExtendedSelection
+        )
         for c in range(1, 4):
             self.folder_tree.hideColumn(c)
         self.folder_tree.selectionModel().selectionChanged.connect(
             self._on_tree_selection_changed
         )
+        self.folder_tree.activated.connect(self._on_tree_double_clicked)
         self.folder_tree.doubleClicked.connect(self._on_tree_double_clicked)
         left_layout.addWidget(self.folder_tree, 2)
+
+        folder_row = QtWidgets.QHBoxLayout()
+        folder_row.setSpacing(8)
 
         self.folder_line = QtWidgets.QLineEdit()
         self.folder_line.setPlaceholderText(T("input_folder"))
         self.folder_line.setClearButtonEnabled(True)
-        left_layout.addWidget(self.folder_line)
+        self.folder_line.returnPressed.connect(self.start_scan)
+        folder_row.addWidget(self.folder_line, 1)
+
+        self.browse_btn = QtWidgets.QPushButton(T("browse"))
+        self.browse_btn.clicked.connect(self._browse_for_folder)
+        folder_row.addWidget(self.browse_btn)
+        left_layout.addLayout(folder_row)
 
         self.recurse_cb = QtWidgets.QCheckBox(T("include_sub"))
         self.recurse_cb.setChecked(True)
@@ -779,16 +926,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.recurse_cb.toggled.connect(self.depth_combo.setEnabled)
 
         self.scan_btn = QtWidgets.QPushButton(T("scan"))
+        self.scan_btn.setObjectName("PrimaryButton")
         self.scan_btn.setIcon(
             self.style().standardIcon(QtWidgets.QStyle.SP_BrowserReload)
-        )
-        self.scan_btn.setStyleSheet(
-            "background-color: #2d7bff; border-color: #2d7bff; font-weight: bold;"
         )
         left_layout.addWidget(self.scan_btn)
 
         right_card = QtWidgets.QFrame()
         right_card.setProperty("class", "card")
+        right_card.setObjectName("Card")
         right_layout = QtWidgets.QVBoxLayout(right_card)
         right_layout.setContentsMargins(12, 12, 12, 12)
 
@@ -818,7 +964,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.show_table_context_menu
         )
         self.table.horizontalHeader().setSortIndicatorShown(True)
-        self.table.horizontalHeader().sectionDoubleClicked.connect(
+        self.table.horizontalHeader().sectionClicked.connect(
             self._sort_results_by_column
         )
 
@@ -829,7 +975,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self._sort_orders = {}
         # --- v2.3 default column widths (from v2.0 Wider) ---
         try:
-            widths = [40, 240, 200, 80, 520, 90, 90, 160]
+            widths = [40, 240, 80, 190, 90, 500, 90, 90, 160]
             for i, w in enumerate(widths):
                 self.table.setColumnWidth(i, w)
         except Exception:
@@ -908,6 +1054,7 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         self.ps_view_btn.clicked.connect(self.show_ps_results)
         self.export_txt_btn.clicked.connect(self.export_checked_txt)
+        self.table.activated.connect(self.open_row_file)
         self.table.doubleClicked.connect(self.open_row_file)
 
         self.sel_all_btn.clicked.connect(
@@ -924,6 +1071,26 @@ class MainWindow(QtWidgets.QMainWindow):
             self.table,
             activated=self.table.selectAll,
         )
+        QtGui.QShortcut(
+            QtGui.QKeySequence("Ctrl+Return"),
+            self,
+            activated=self.start_scan,
+        )
+        QtGui.QShortcut(
+            QtGui.QKeySequence("Ctrl+Shift+C"),
+            self,
+            activated=self.copy_checked,
+        )
+        QtGui.QShortcut(
+            QtGui.QKeySequence("Ctrl+Shift+N"),
+            self,
+            activated=self.copy_checked_filenames,
+        )
+        QtGui.QShortcut(
+            QtGui.QKeySequence("Ctrl+Shift+P"),
+            self,
+            activated=self.copy_checked_ps,
+        )
 
         # Logic for Default Folder vs Last Folder
         default_folder = self.settings.value("default_start_folder", "")
@@ -935,8 +1102,11 @@ class MainWindow(QtWidgets.QMainWindow):
         elif last_folder and os.path.isdir(str(last_folder)):
             start_dir = str(last_folder)
             
+        if startup_dir and os.path.isdir(startup_dir):
+            start_dir = startup_dir
+
         if start_dir:
-            self.folder_line.setText(start_dir)
+            self._set_scan_roots([start_dir])
 
     def _build_menubar(self):
         mb = self.menuBar()
@@ -1009,9 +1179,9 @@ class MainWindow(QtWidgets.QMainWindow):
             grp.addAction(a)
             lang.addAction(a)
 
-        m_help = mb.addMenu(T("help"))
-        m_help.addAction(T("help"), self._show_help)
-        m_help.addAction(T("about_title"), self._show_about)
+        m_info = mb.addMenu(T("info_menu"))
+        m_info.addAction(T("help"), self._show_help)
+        m_info.addAction(T("about_title"), self._show_about)
 
     # --- Settings Logic ---
     
@@ -1027,7 +1197,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings.setValue("copy_separator", val)
 
     def _set_default_folder(self):
-        curr = self.folder_line.text()
+        roots = parse_scan_roots_text(self.folder_line.text())
+        curr = roots[0] if roots else self.folder_line.text().strip()
         if curr and os.path.isdir(curr):
             self.settings.setValue("default_start_folder", curr)
             self.setStatus(T("default_set").format(p=curr))
@@ -1062,9 +1233,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def _change_lang(self, code):
         set_lang(code)
         self.status_lbl.setText("Language changed. Restart recommended.")
-        self.setWindowTitle(T("header_title"))
+        self.setWindowTitle(build_window_title())
         self.app_name_label.setText(APP_NAME)
         self.tagline_label.setText(T("tagline"))
+        self.folder_line.setPlaceholderText(T("input_folder"))
+        self.browse_btn.setText(T("browse"))
         self.scan_btn.setText(T("scan"))
         self.copy_btn.setText(T("copy_sel"))
         self.copy_names_btn.setText(T("copy_names"))
@@ -1142,21 +1315,51 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _set_header_bg(self):
         style = """
-            background: qlineargradient(x1:0,y1:0,x2:1,y2:0, stop:0 #050814, stop:0.8 #172237);
-            border-radius: 12px; border: 1px solid #1d2a3e;
+            background: qlineargradient(x1:0,y1:0,x2:1,y2:0, stop:0 #09243f, stop:0.36 #0b3a5f, stop:0.68 #17243f, stop:1 #101725);
+            border-radius: 20px;
+            border: 1px solid #2f80bd;
         """
         self.header_frame.setStyleSheet(style)
 
+    def _set_scan_roots(self, paths: Iterable[str]) -> None:
+        roots = unique_existing_dirs(paths)
+        self._selected_scan_paths = roots
+        self.folder_line.setText("; ".join(roots))
+        if roots:
+            self.setStatus(T("selected_folders").format(n=len(roots)))
+
+    def _collect_selected_scan_paths(self) -> List[str]:
+        paths: List[str] = []
+        for view in (self.user_list, self.folder_tree):
+            selection_model = view.selectionModel()
+            if not selection_model:
+                continue
+            for index in selection_model.selectedRows():
+                path = index.model().filePath(index)
+                if os.path.isdir(path):
+                    paths.append(path)
+        return unique_existing_dirs(paths)
+
     def _on_tree_selection_changed(self, sel, desel):
-        if sel.indexes():
-            index = sel.indexes()[0]
-            source_model = index.model()
-            self.folder_line.setText(source_model.filePath(index))
+        paths = self._collect_selected_scan_paths()
+        if paths:
+            self._set_scan_roots(paths)
+
+    def _browse_for_folder(self):
+        roots = parse_scan_roots_text(self.folder_line.text())
+        current = roots[0] if roots else self.folder_line.text().strip()
+        base_dir = current if os.path.isdir(current) else QtCore.QDir.homePath()
+        selected = QtWidgets.QFileDialog.getExistingDirectory(
+            self,
+            T("input_folder"),
+            base_dir,
+        )
+        if selected:
+            self._set_scan_roots([selected])
 
     def _on_tree_double_clicked(self, idx):
         source_model = idx.model()
         path = source_model.filePath(idx)
-        self.folder_line.setText(path)
 
         # Synchroniseer de onderste TreeView en klap deze open
         if os.path.isdir(path):
@@ -1165,21 +1368,22 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.folder_tree.setCurrentIndex(tree_idx)
                 self.folder_tree.scrollTo(tree_idx)
                 self.folder_tree.expand(tree_idx)
+            self._set_scan_roots(self._collect_selected_scan_paths() or [path])
 
     def start_scan(self):
-        f = self.folder_line.text().strip()
-        if not f or not os.path.isdir(f):
+        roots = parse_scan_roots_text(self.folder_line.text())
+        roots = compact_scan_roots(roots, self.recurse_cb.isChecked())
+        if not roots:
             self.setStatus(T("invalid_folder"))
             return
 
-        QtCore.QSettings(SETTINGS_ORG, APP_ID).setValue(
-            "last_folder", f
-        )
+        self._set_scan_roots(roots)
+        QtCore.QSettings(SETTINGS_ORG, APP_ID).setValue("last_folder", roots[0])
 
         if self._thread:
             self._worker.abort()
         self.model.setItems([])
-        self.setStatus(T("scanning").format(p=f))
+        self.setStatus(T("scanning").format(p="; ".join(roots)))
 
         self._thread = QtCore.QThread()
         # Pass show_hidden and want_duration correctly
@@ -1197,7 +1401,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 max_depth = -1  # onbeperkt
 
         self._worker = ScannerWorker(
-            f,
+            roots,
             self.recurse_cb.isChecked(),
             max_depth,
             self.want_duration,
@@ -1360,7 +1564,15 @@ def main():
     app_icon = load_app_icon()
     if not app_icon.isNull():
         app.setWindowIcon(app_icon)
-    w = MainWindow()
+    startup_dir = ""
+    if len(sys.argv) > 1:
+        candidate = os.path.normpath(sys.argv[1].strip('"'))
+        if os.path.isfile(candidate):
+            candidate = os.path.dirname(candidate)
+        if os.path.isdir(candidate):
+            startup_dir = candidate
+
+    w = MainWindow(startup_dir=startup_dir)
     w.show()
     sys.exit(app.exec())
 
